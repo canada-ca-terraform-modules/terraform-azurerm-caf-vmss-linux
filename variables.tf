@@ -1,50 +1,37 @@
-# General configuration variables
 variable "tags" {
-  type        = map(string)
-  description = "Tags to be applied to all resources"
+  type = any
 }
 
 variable "env" {
-  type        = string
-  description = "Deployment environment (e.g., prod, dev, staging)"
+  type = string
 }
-
 variable "group" {
-  type        = string
-  description = "Group identifier for resource grouping"
+  type = string
 }
-
 variable "project" {
-  type        = string
-  description = "Project name identifier"
+  type = string
 }
 
 variable "location" {
-  type        = string
-  description = "Geographical location for the resources"
+  type = string
 }
 
-# Virtual machine scale set (VMSS) configuration
 variable "vmss" {
-  type        = map(any)
+  description = "Details about vmss config"
+  type        = any
   default     = {}
-  description = "Details about the VMSS configuration"
 }
 
-# Resource groups configuration
 variable "resource_groups" {
-  type        = list(map(any))
-  description = "List of resource group objects"
+  description = "List of resource groups objets"
+  type = any
 }
 
-# Network subnets configuration
 variable "subnets" {
-  type        = list(map(any))
-  description = "List of subnet objects"
+  description = "List of subnets objects"
+  type = any
 }
 
-# Administrative configurations
 variable "admin_password" {
-  type        = string
-  description = "Administrator password for virtual machines"
+  type = string
 }
