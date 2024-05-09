@@ -4,5 +4,5 @@ locals {
   serverType_3         = "SLG"
   postfix_3            = substr(var.vmss.postfix, 0, 3)
   userDefinedString_54 = substr(var.vmss.userDefinedString, 0, 54 - length(local.postfix_3))
-  vmss_name            = replace("${local.env_4}${local.serverType_3}-${local.userDefinedString_54}${local.postfix_3}", local.vmss_linux_regex, "")
+  vmss_name            = try(var.vmss.custom_name, replace("${local.env_4}${local.serverType_3}-${local.userDefinedString_54}${local.postfix_3}", local.vmss_linux_regex, ""))
 }
