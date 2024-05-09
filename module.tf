@@ -6,6 +6,7 @@ resource "azurerm_linux_virtual_machine_scale_set" "vmss_linux" {
   instances                       = var.vmss.instances
   admin_username                  = try(var.vmss.admin_username, "azureadmin")
   admin_password                  = var.admin_password
+  computer_name_prefix            = try(var.vmss.computer_name_prefix, "vmsslin-") # Optional. eg: "devopsw-"
   disable_password_authentication = false
 
   overprovision          = var.vmss.overprovision
