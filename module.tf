@@ -30,6 +30,14 @@ resource "azurerm_linux_virtual_machine_scale_set" "vmss_linux" {
     caching              = var.vmss.os_disk.caching
   }
 
+  dynamic "scale_in" {
+    for_each = try(var.vmss.scale_in, {})
+    content {
+      rule                   = try(scale_in.value.rule, null)
+      force_deletion_enabled = try(scale_in.value.force_deletion_enabled, null)
+    }
+  }
+
   network_interface {
     name    = "${local.vmss_name}-nic1"
     primary = true
