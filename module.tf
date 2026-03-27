@@ -51,6 +51,6 @@ resource "azurerm_linux_virtual_machine_scale_set" "vmss_linux" {
   }
 
   lifecycle {
-    ignore_changes = [tags, instances] # ignore changes made to tags by App Services
+    ignore_changes = [tags, instances, identity] # ignore changes made outside of Terraform (e.g. tags by App Services, identity by external tooling)
   }
 }
