@@ -14,20 +14,20 @@ lb = {
   }
   rules = {
     tcp443 = {
-      protocol           = "Tcp"
-      frontend_port      = 443
-      backend_port       = 443
-      probe_name         = "tcp443"
-      load_distribution  = "SourceIPProtocol"
-      enable_floating_ip = true
+      protocol            = "Tcp"
+      frontend_port       = 443
+      backend_port        = 443
+      probe_name          = "tcp443"
+      load_distribution   = "SourceIPProtocol"
+      floating_ip_enabled = true # Optional alias: enable_floating_ip (kept for azurerm < 5.0 configs)
     },
     tcp80 = {
-      protocol           = "TCP"
-      frontend_port      = 80
-      backend_port       = 80
-      probe_name         = "tcp443"
-      load_distribution  = "SourceIPProtocol"
-      enable_floating_ip = true
+      protocol            = "TCP"
+      frontend_port       = 80
+      backend_port        = 80
+      probe_name          = "tcp443"
+      load_distribution   = "SourceIPProtocol"
+      floating_ip_enabled = true
     }
   }
 }
@@ -39,22 +39,22 @@ resource "azurerm_lb" "loadbalancer" {
   count = try(var.vmss.lb, null) != null ? 1 : 0
 
   # Name and location settings for the load balancer
-  name                = "${local.vmss_name}-lb"
+  name                = local.lb_name
   location            = var.location
   resource_group_name = var.resource_groups[var.vmss.resource_group_name].name
-  
+
   # Frontend IP configuration - defines how the load balancer is exposed on the network
   frontend_ip_configuration {
-    name                          = "${local.vmss_name}-lbfe"
+    name = local.lb_frontend_name
 
     # Allocation method for the frontend IP - defaults to 'Static' if not specified
     private_ip_address_allocation = try(var.vmss.lb.private_ip_address_allocation, "Static")
 
     # Assigns a static IP if the allocation method is 'Static', otherwise no IP is assigned
-    private_ip_address            = try(var.vmss.lb.private_ip_address_allocation, "Static") == "Static" ? var.vmss.lb.private_ip_address : null
+    private_ip_address = try(var.vmss.lb.private_ip_address_allocation, "Static") == "Static" ? try(var.vmss.lb.private_ip_address, null) : null
 
     # Subnet ID for the frontend IP - defaults to the subnet specified for the load balancer, otherwise uses the VMSS subnet
-    subnet_id                     = try(var.subnets[var.vmss.lb.subnet_name].id, var.subnets[var.vmss.subnet_name].id)
+    subnet_id = try(var.subnets[var.vmss.lb.subnet_name].id, var.subnets[var.vmss.subnet_name].id)
   }
 
   # SKU for the load balancer, defaults to 'Standard' if not specified
@@ -66,7 +66,7 @@ resource "azurerm_lb_probe" "loadbalancer-lbhp" {
 
   # resource_group_name = var.resource_group.name
   loadbalancer_id     = azurerm_lb.loadbalancer[0].id
-  name                = "${local.vmss_name}-${each.key}-lbhp"
+  name                = try(each.value["name"], "${local.vmss_name}-${each.key}-lbhp")
   protocol            = try(each.value["protocol"], "Tcp")
   port                = each.value.port
   request_path        = try(each.value["request_path"], null)
@@ -78,7 +78,7 @@ resource "azurerm_lb_backend_address_pool" "loadbalancer-lbbp" {
   count = try(var.vmss.lb, null) != null ? 1 : 0
 
   loadbalancer_id = azurerm_lb.loadbalancer[0].id
-  name            = "${local.vmss_name}-HA-lbbp"
+  name            = local.lb_backend_pool_name
 }
 
 resource "azurerm_lb_rule" "loadbalancer-lbr" {
@@ -86,14 +86,16 @@ resource "azurerm_lb_rule" "loadbalancer-lbr" {
 
   # resource_group_name            = var.resource_group.name
   loadbalancer_id                = azurerm_lb.loadbalancer[0].id
-  name                           = "${local.vmss_name}-${each.key}-lbr"
+  name                           = try(each.value.name, "${local.vmss_name}-${each.key}-lbr")
   protocol                       = each.value.protocol
   frontend_port                  = each.value.frontend_port
   backend_port                   = each.value.backend_port
-  frontend_ip_configuration_name = "${local.vmss_name}-lbfe"
+  frontend_ip_configuration_name = local.lb_frontend_name
   backend_address_pool_ids       = [azurerm_lb_backend_address_pool.loadbalancer-lbbp[0].id]
-  probe_id                       = azurerm_lb_probe.loadbalancer-lbhp["${each.value.probe_name}"].id
+  probe_id                       = azurerm_lb_probe.loadbalancer-lbhp[each.value.probe_name].id
   load_distribution              = each.value.load_distribution
-  enable_floating_ip             = each.value.enable_floating_ip
-  idle_timeout_in_minutes        = try(each.value.idle_timeout_in_minutes, 4)
+  # azurerm >= 5.0: enable_floating_ip renamed to floating_ip_enabled. Accept either key from
+  # tfvars for backward compatibility with configs written against azurerm < 5.0.
+  floating_ip_enabled     = try(each.value.floating_ip_enabled, each.value.enable_floating_ip)
+  idle_timeout_in_minutes = try(each.value.idle_timeout_in_minutes, 4)
 }

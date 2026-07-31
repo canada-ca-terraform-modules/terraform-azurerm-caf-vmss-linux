@@ -1,0 +1,26 @@
+.terraform/
+.terraform.lock.hcl
+.terragrunt-cache/
+# terragrunt-generated files that embed real subscription IDs / storage account names
+backend.azurerm.tf
+remote_provider.tf
+*.tfstate
+*.tfstate.*
+*.tfplan
+crash.log
+crash.*.log
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+# ignore all tfvars (may contain secrets)
+*.tfvars
+*.tfvars.json
+# keep ESLZ example files tracked
+!ESLZ/*.tfvars
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db

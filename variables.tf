@@ -1,16 +1,16 @@
 variable "tags" {
   description = "Tags that will be associated with the ressource"
-  type = map(string)
+  type        = map(string)
 }
 
 variable "env" {
   description = "4 characters defining the envrionment name prefix for the scale set"
-  type = string
+  type        = string
 }
 
 variable "location" {
   description = "Azure Location in which the scale set is deployed"
-  type = string
+  type        = string
 }
 
 variable "vmss" {
@@ -21,21 +21,21 @@ variable "vmss" {
 
 variable "resource_groups" {
   description = "List of resource groups objets"
-  type = any
+  type        = any
 }
 
 variable "subnets" {
   description = "List of subnets objects"
-  type = any
+  type        = any
 }
 
 variable "admin_password" {
   description = "The password for the local administrator account on the virtual machines"
-  type = string
+  type        = string
 }
 
 variable "custom_data" {
   description = "Custom data for VM instances"
-  type = string
-  default = null
+  type        = string
+  default     = null
 }

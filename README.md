@@ -1,14 +1,90 @@
-# terraform-azurerm-caf-vmss-windows
+# terraform-azurerm-caf-vmss-linux
+
+Deploys a Linux Virtual Machine Scale Set (Uniform orchestration mode), with an
+optional internal Standard Load Balancer, following the SSC CAF naming
+convention.
+
+## Usage
+
+### ESLZ module block (`ESLZ/vmss_linux.tf`)
+
+```hcl
+module "vmss_linux" {
+  source   = "github.com/canada-ca-terraform-modules/terraform-azurerm-caf-vmss-linux?ref=v1.3.0"
+  for_each = var.vmss_linux
+
+  tags            = try(each.value.tags, var.tags)
+  env             = var.env
+  location        = try(each.value.location, var.location)
+  resource_groups = var.resource_groups
+  subnets         = var.subnets
+  admin_password  = try(each.value.admin_password, var.admin_password)
+  custom_data     = try(each.value.custom_data, var.custom_data)
+  vmss            = each.value
+}
+```
+
+### ESLZ tfvars pattern (`ESLZ/vmss_linux.tfvars`)
+
+```hcl
+vmss_linux = {
+  app01 = {
+    resource_group_name = "app-rg"
+    subnet_name         = "app-subnet"
+    sku                 = "Standard_D2s_v5"
+    instances           = 2
+    postfix             = "web"
+    userDefinedString   = "myapp"
+
+    source_image_reference = {
+      publisher = "Canonical"
+      offer     = "0001-com-ubuntu-server-jammy"
+      sku       = "22_04-lts"
+      version   = "latest"
+    }
+
+    os_disk = {
+      storage_account_type = "Standard_LRS"
+      caching              = "ReadWrite"
+    }
+  }
+}
+```
+
+## azurerm >= 5.0 notes
+
+* Load balancer rules accept the new `floating_ip_enabled` key. The legacy
+  `enable_floating_ip` key (used by azurerm < 5.0) is still accepted for
+  backward compatibility.
+* `vmss_name`, `nic_name`, `lb.name`, `lb.frontend_name` and
+  `lb.backend_pool_name` are optional overrides for the auto-generated
+  resource names — use them to pin names for infrastructure whose real names
+  diverge from the naming formula, without a destroy/recreate.
+
+## Testing
+
+```bash
+terraform fmt -recursive && terraform init -backend=false && terraform validate && terraform test
+```
+
+## CI
+
+GitHub Actions workflow at `.github/workflows/terraform-ci.yml` runs fmt, init,
+validate, and test on every PR.
+
 <!-- BEGIN_TF_DOCS -->
 ## Requirements
 
-No requirements.
+| Name | Version |
+|------|---------|
+| <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 1.9 |
+| <a name="requirement_azurerm"></a> [azurerm](#requirement\_azurerm) | ~> 5.0 |
 
 ## Providers
 
 | Name | Version |
 |------|---------|
-| <a name="provider_azurerm"></a> [azurerm](#provider\_azurerm) | n/a |
+| <a name="provider_azurerm"></a> [azurerm](#provider\_azurerm) | 5.0.1 |
 
 ## Modules
 
