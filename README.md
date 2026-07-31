@@ -105,15 +105,20 @@ No modules.
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
 | <a name="input_admin_password"></a> [admin\_password](#input\_admin\_password) | The password for the local administrator account on the virtual machines | `string` | n/a | yes |
-| <a name="input_custom_data"></a> [custom\_data](#input\_custom\_data) | Custom data for VM instances | `string` | `null` | no |
-| <a name="input_env"></a> [env](#input\_env) | 4 characters defining the envrionment name prefix for the scale set | `string` | n/a | yes |
+| <a name="input_custom_data"></a> [custom\_data](#input\_custom\_data) | Custom data for VM instances (must be Base64-encoded) | `string` | `null` | no |
+| <a name="input_env"></a> [env](#input\_env) | 4 characters defining the environment name prefix for the scale set | `string` | n/a | yes |
 | <a name="input_location"></a> [location](#input\_location) | Azure Location in which the scale set is deployed | `string` | n/a | yes |
-| <a name="input_resource_groups"></a> [resource\_groups](#input\_resource\_groups) | List of resource groups objets | `any` | n/a | yes |
+| <a name="input_resource_groups"></a> [resource\_groups](#input\_resource\_groups) | List of resource group objects | `any` | n/a | yes |
 | <a name="input_subnets"></a> [subnets](#input\_subnets) | List of subnets objects | `any` | n/a | yes |
-| <a name="input_tags"></a> [tags](#input\_tags) | Tags that will be associated with the ressource | `map(string)` | n/a | yes |
+| <a name="input_tags"></a> [tags](#input\_tags) | Tags that will be associated with the resource | `map(string)` | `{}` | no |
 | <a name="input_vmss"></a> [vmss](#input\_vmss) | Details about vmss config | `any` | `{}` | no |
 
 ## Outputs
 
-No outputs.
+| Name | Description |
+|------|-------------|
+| <a name="output_lb_frontend_ip_address"></a> [lb\_frontend\_ip\_address](#output\_lb\_frontend\_ip\_address) | The private frontend IP address of the Load Balancer (null when no LB is configured) |
+| <a name="output_lb_id"></a> [lb\_id](#output\_lb\_id) | The resource ID of the Load Balancer (null when no LB is configured) |
+| <a name="output_vmss_id"></a> [vmss\_id](#output\_vmss\_id) | The resource ID of the Linux Virtual Machine Scale Set |
+| <a name="output_vmss_name"></a> [vmss\_name](#output\_vmss\_name) | The name of the Linux Virtual Machine Scale Set |
 <!-- END_TF_DOCS -->
