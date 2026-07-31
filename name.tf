@@ -8,9 +8,11 @@ locals {
 
   # Optional overrides for every auto-generated resource name below. Callers whose real infra
   # names diverge from the naming formula can pin them here without forcing a destroy/recreate.
-  vmss_resource_name   = try(var.vmss.vmss_name, "${local.vmss_name}-vmss")
-  nic_name             = try(var.vmss.nic_name, "${local.vmss_name}-nic1")
-  lb_name              = try(var.vmss.lb.name, "${local.vmss_name}-lb")
-  lb_frontend_name     = try(var.vmss.lb.frontend_name, "${local.vmss_name}-lbfe")
-  lb_backend_pool_name = try(var.vmss.lb.backend_pool_name, "${local.vmss_name}-HA-lbbp")
+  # coalesce() is used so that an explicit null value falls back to the generated name, just
+  # like an absent key would.
+  vmss_resource_name   = coalesce(try(var.vmss.vmss_name, null), "${local.vmss_name}-vmss")
+  nic_name             = coalesce(try(var.vmss.nic_name, null), "${local.vmss_name}-nic1")
+  lb_name              = coalesce(try(var.vmss.lb.name, null), "${local.vmss_name}-lb")
+  lb_frontend_name     = coalesce(try(var.vmss.lb.frontend_name, null), "${local.vmss_name}-lbfe")
+  lb_backend_pool_name = coalesce(try(var.vmss.lb.backend_pool_name, null), "${local.vmss_name}-HA-lbbp")
 }

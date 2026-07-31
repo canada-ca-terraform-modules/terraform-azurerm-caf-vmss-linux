@@ -58,7 +58,8 @@ resource "azurerm_lb" "loadbalancer" {
   }
 
   # SKU for the load balancer, defaults to 'Standard' if not specified
-  sku = try(var.vmss.lb.sku, "Standard")
+  sku  = try(var.vmss.lb.sku, "Standard")
+  tags = var.tags
 }
 
 resource "azurerm_lb_probe" "loadbalancer-lbhp" {
@@ -96,6 +97,6 @@ resource "azurerm_lb_rule" "loadbalancer-lbr" {
   load_distribution              = each.value.load_distribution
   # azurerm >= 5.0: enable_floating_ip renamed to floating_ip_enabled. Accept either key from
   # tfvars for backward compatibility with configs written against azurerm < 5.0.
-  floating_ip_enabled     = try(each.value.floating_ip_enabled, each.value.enable_floating_ip)
+  floating_ip_enabled     = try(each.value.floating_ip_enabled, each.value.enable_floating_ip, false)
   idle_timeout_in_minutes = try(each.value.idle_timeout_in_minutes, 4)
 }

@@ -14,11 +14,20 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   automatically).
 - `azurerm_lb_rule.loadbalancer-lbr`: `enable_floating_ip` renamed by the
   provider to `floating_ip_enabled` in azurerm 5.0. The module now reads
-  `floating_ip_enabled` first and falls back to the legacy `enable_floating_ip`
-  key, so existing `ESLZ/*.tfvars` continue to work unchanged.
+  `floating_ip_enabled` first, falls back to the legacy `enable_floating_ip`
+  key, then defaults to `false` — so existing `ESLZ/*.tfvars` continue to
+  work unchanged even when neither key is supplied.
 - Removed dead, commented-out `automatic_os_upgrade_policy` block from
   `module.tf` (referenced provider arguments removed in azurerm 5.0 and was
   never active).
+- `admin_password` variable now marked `sensitive = true` to prevent the
+  password from appearing in Terraform CLI output or plan diffs.
+- `tags` variable now has `default = {}`, making it optional.
+- `azurerm_lb.loadbalancer` now receives `tags = var.tags` for consistency
+  with the VMSS resource.
+- Name override locals (`vmss_resource_name`, `nic_name`, `lb_*`) now use
+  `coalesce(try(override, null), generated)` so that an explicit `null` value
+  falls back to the generated name, matching the behaviour of an absent key.
 
 ### Added
 
@@ -31,6 +40,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - `ESLZ/vmss_linux.tf` and `ESLZ/vmss_linux.tfvars` — module block and example
   tfvars for L2 blueprints (previously absent).
 - `tests/vmss_linux.tftest.hcl` and `tests/upgrade_compat.tftest.hcl`.
+  Added test case `loadbalancer_floating_ip_omitted` to verify the `false`
+  default when neither `floating_ip_enabled` nor `enable_floating_ip` is set.
+- `outputs.tf` exporting `vmss_id`, `vmss_name`, `lb_id`, and
+  `lb_frontend_ip_address` so callers can chain the module's resources.
+- `lifecycle.precondition` on the VMSS resource that enforces the Azure
+  64-character name limit at plan time with a human-readable error message.
 - `.github/workflows/terraform-ci.yml` running fmt/init/validate/test/tflint.
 - `.gitignore` and `.gitattributes` (LF line endings).
 

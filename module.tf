@@ -47,6 +47,10 @@ resource "azurerm_linux_virtual_machine_scale_set" "vmss_linux" {
   }
 
   lifecycle {
+    precondition {
+      condition     = length(local.vmss_resource_name) <= 64
+      error_message = "The generated VMSS name '${local.vmss_resource_name}' is ${length(local.vmss_resource_name)} characters, which exceeds the Azure 64-character limit. Shorten vmss.userDefinedString or vmss.postfix, or set vmss.vmss_name to an explicit name."
+    }
     ignore_changes = [tags, instances, identity] # ignore changes made outside of Terraform (e.g. tags by App Services, identity by external tooling)
   }
 }

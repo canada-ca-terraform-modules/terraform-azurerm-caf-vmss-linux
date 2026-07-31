@@ -1,10 +1,11 @@
 variable "tags" {
-  description = "Tags that will be associated with the ressource"
+  description = "Tags that will be associated with the resource"
   type        = map(string)
+  default     = {}
 }
 
 variable "env" {
-  description = "4 characters defining the envrionment name prefix for the scale set"
+  description = "4 characters defining the environment name prefix for the scale set"
   type        = string
 }
 
@@ -20,7 +21,7 @@ variable "vmss" {
 }
 
 variable "resource_groups" {
-  description = "List of resource groups objets"
+  description = "List of resource group objects"
   type        = any
 }
 
@@ -32,10 +33,11 @@ variable "subnets" {
 variable "admin_password" {
   description = "The password for the local administrator account on the virtual machines"
   type        = string
+  sensitive   = true
 }
 
 variable "custom_data" {
-  description = "Custom data for VM instances"
+  description = "Custom data for VM instances (must be Base64-encoded)"
   type        = string
   default     = null
 }

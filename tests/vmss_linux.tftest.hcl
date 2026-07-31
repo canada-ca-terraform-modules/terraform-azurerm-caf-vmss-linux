@@ -239,3 +239,55 @@ run "loadbalancer_floating_ip_enabled_legacy_key" {
     error_message = "legacy enable_floating_ip key must still be honoured for backward compatibility"
   }
 }
+
+run "loadbalancer_floating_ip_omitted" {
+  command = plan
+
+  variables {
+    vmss = {
+      resource_group_name = "rg-test"
+      subnet_name         = "subnet-test"
+      sku                 = "Standard_D2s_v5"
+      instances           = 1
+      postfix             = "lb3"
+      userDefinedString   = "myapp"
+
+      overprovision          = true
+      single_placement_group = true
+
+      source_image_reference = {
+        publisher = "Canonical"
+        offer     = "0001-com-ubuntu-server-jammy"
+        sku       = "22_04-lts"
+        version   = "latest"
+      }
+
+      os_disk = {
+        storage_account_type = "Standard_LRS"
+        caching              = "ReadWrite"
+      }
+
+      lb = {
+        sku = "Standard"
+        probes = {
+          tcp443 = { port = 443 }
+        }
+        rules = {
+          tcp443 = {
+            protocol          = "Tcp"
+            frontend_port     = 443
+            backend_port      = 443
+            probe_name        = "tcp443"
+            load_distribution = "SourceIPProtocol"
+            # floating_ip_enabled intentionally omitted — must not error
+          }
+        }
+      }
+    }
+  }
+
+  assert {
+    condition     = azurerm_lb_rule.loadbalancer-lbr["tcp443"].floating_ip_enabled == false
+    error_message = "floating_ip_enabled must default to false when neither key is supplied"
+  }
+}
