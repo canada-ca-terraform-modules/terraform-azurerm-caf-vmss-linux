@@ -1,5 +1,5 @@
 resource "azurerm_linux_virtual_machine_scale_set" "vmss_linux" {
-  name                            = "${local.vmss_name}-vmss"
+  name                            = local.vmss_resource_name
   location                        = var.location
   resource_group_name             = var.resource_groups[var.vmss.resource_group_name].name
   sku                             = var.vmss.sku
@@ -9,6 +9,7 @@ resource "azurerm_linux_virtual_machine_scale_set" "vmss_linux" {
   computer_name_prefix            = try(var.vmss.computer_name_prefix, "vmsslin-") # Optional. eg: "devopsw-"
   disable_password_authentication = false
   custom_data                     = var.custom_data
+  tags                            = var.tags
 
   overprovision          = var.vmss.overprovision
   single_placement_group = var.vmss.single_placement_group
@@ -19,11 +20,6 @@ resource "azurerm_linux_virtual_machine_scale_set" "vmss_linux" {
     sku       = var.vmss.source_image_reference.sku
     version   = var.vmss.source_image_reference.version
   }
-
-  # automatic_os_upgrade_policy {
-  #         disable_automatic_rollback  = null
-  #         enable_automatic_os_upgrade =  null
-  #       }
 
   os_disk {
     storage_account_type = var.vmss.os_disk.storage_account_type
@@ -39,7 +35,7 @@ resource "azurerm_linux_virtual_machine_scale_set" "vmss_linux" {
   }
 
   network_interface {
-    name    = "${local.vmss_name}-nic1"
+    name    = local.nic_name
     primary = true
 
     ip_configuration {
@@ -51,6 +47,10 @@ resource "azurerm_linux_virtual_machine_scale_set" "vmss_linux" {
   }
 
   lifecycle {
+    precondition {
+      condition     = length(local.vmss_resource_name) <= 64
+      error_message = "The generated VMSS name '${local.vmss_resource_name}' is ${length(local.vmss_resource_name)} characters, which exceeds the Azure 64-character limit. Shorten vmss.userDefinedString or vmss.postfix, or set vmss.vmss_name to an explicit name."
+    }
     ignore_changes = [tags, instances, identity] # ignore changes made outside of Terraform (e.g. tags by App Services, identity by external tooling)
   }
 }
